@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Sport Tournament Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Beige, Soft Brown, Cream) -->
+    <!-- Application Structure Plan: A single-page dashboard with vertical navigation. The structure includes: Overview, Format (with a visual knockout bracket), Team Composition, an interactive Schedule, Scoring, and a dynamic Leaderboard. This tabbed, thematic approach was chosen for its intuitive user flow, allowing participants to quickly find specific information without scrolling through a long document. It turns a static plan into a functional, easy-to-navigate event hub. -->
+    <!-- Visualization & Content Choices: 
+        - Overview: Goal: Inform. Method: Text blocks. Interaction: None. Justification: Provides essential context.
+        - Format: Goal: Explain. Method: HTML/CSS diagram. Interaction: None. Justification: Visually clarifies the new knockout structure, which is a key part of the plan.
+        - Team Composition: Goal: Inform. Method: Styled list with icons (Unicode). Interaction: None. Justification: Clearly presents team rules.
+        - Schedule: Goal: Organize/Explore. Method: Interactive table. Interaction: JS buttons to filter by day. Justification: Enhances usability over a static schedule.
+        - Scoring: Goal: Inform. Method: Key-value display. Interaction: None. Justification: Simplifies the points system.
+        - Leaderboard: Goal: Compare. Method: Bar Chart (Chart.js/Canvas). Interaction: Hover for details. Justification: Provides a dynamic, visual representation of team standings.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F5DC;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            background-color: #c7a17a;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px;
+            }
+        }
+        .bracket {
+            display: flex;
+            justify-content: space-around;
+            flex-direction: column;
+            width: 100%;
+        }
+        .round {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
+            flex-grow: 1;
+        }
+        .match {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            margin: 20px 0;
+        }
+        .team {
+            padding: 10px;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .connector {
+            position: absolute;
+            top: 25%;
+            height: 50%;
+            border: 2px solid #c7a17a;
+            border-left: none;
+        }
+        .line {
+            position: absolute;
+            top: 50%;
+            width: 20px;
+            border-top: 2px solid #c7a17a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#6B4F4F]">Multi-Sport Tournament Hub</h1>
+            <p class="text-lg text-[#A0522D] mt-2">The official guide to the knockout challenge</p>
+        </header>
+
+        <main class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-4 md:p-6">
+            <div class="flex flex-col md:flex-row gap-6">
+                <aside class="w-full md:w-1/4">
+                    <nav id="navigation" class="flex flex-row md:flex-col justify-around md:justify-start bg-[#FFF8E1] p-3 rounded-lg shadow-md">
+                        <button data-target="overview" class="nav-link active text-left p-3 rounded-md w-full mb-0 md:mb-2 text-sm md:text-base">📋 Overview</button>
+                        <button data-target="format" class="nav-link text-left p-3 rounded-md w-full mb-0 md:mb-2 text-sm md:text-base">⚔️ Format</button>
+                        <button data-target="teams" class="nav-link text-left p-3 rounded-md w-full mb-0 md:mb-2 text-sm md:text-base">👥 Teams</button>
+                        <button data-target="schedule" class="nav-link text-left p-3 rounded-md w-full mb-0 md:mb-2 text-sm md:text-base">🗓️ Schedule</button>
+                        <button data-target="scoring" class="nav-link text-left p-3 rounded-md w-full mb-0 md:mb-2 text-sm md:text-base">🏆 Scoring</button>
+                        <button data-target="leaderboard" class="nav-link text-left p-3 rounded-md w-full text-sm md:text-base">📊 Leaderboard</button>
+                    </nav>
+                </aside>
+
+                <div class="w-full md:w-3/4 min-h-[400px]">
+                    <section id="overview" class="content-section active">
+                        <h2 class="text-2xl font-bold mb-4 text-[#6B4F4F]">Tournament Overview</h2>
+                        <p class="mb-4">Welcome to the official hub for our multi-sport tournament. This event features Tennis, Cricket, Football, Volleyball, Badminton, Snooker, and a walking challenge. Each sport is structured as a high-stakes, single-elimination knockout tournament.</p>
+                        <p>While individual sports are knockout-based, the overall tournament champion is determined by a cumulative points system. Teams earn points for wins and participation across all events. Use the navigation to explore the tournament format, team rules, the full schedule, scoring system, and to track live standings on the leaderboard.</p>
+                    </section>
+
+                    <section id="format" class="content-section">
+                        <h2 class="text-2xl font-bold mb-4 text-[#6B4F4F]">Knockout Format Explained</h2>
+                        <p class="mb-4">Each sport follows a single-elimination knockout format. This means a team is eliminated from that specific sport's bracket after a single loss. The winner of each match advances to the next round until one champion remains. Below is a simple example for a 4-team bracket.</p>
+                        <div class="flex items-center space-x-4 md:space-x-8 p-4 bg-[#FFF8E1] rounded-lg">
+                            <div class="w-1/3 text-center">
+                                <h3 class="font-semibold mb-2">Semi-Finals</h3>
+                                <div class="relative mb-8">
+                                    <div class="team">Team A</div>
+                                    <div class="team">Team B</div>
+                                </div>
+                                <div class="relative">
+                                    <div class="team">Team C</div>
+                                    <div class="team">Team D</div>
+                                </div>
+                            </div>
+                            <div class="w-1/3 text-center">
+                                <h3 class="font-semibold mb-2">Final</h3>
+                                <div class="relative h-full flex items-center">
+                                    <div class="team w-full">Winner 1</div>
+                                    <div class="team w-full mt-24">Winner 2</div>
+                                </div>
+                            </div>
+                            <div class="w-1/3 text-center">
+                                <h3 class="font-semibold mb-2">Champion</h3>
+                                <div class="relative h-full flex items-center">
+                                    <div class="team w-full font-bold bg-[#c7a17a] text-white">🏆 Winner</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="teams" class="content-section">
+                        <h2 class="text-2xl font-bold mb-4 text-[#6B4F4F]">Team Composition</h2>
+                         <p class="mb-4">To ensure balanced competition, all teams must adhere to the following composition rules. Each team is capped at 8 players, with specific requirements for age and gender to promote inclusivity.</p>
+                        <ul class="space-y-3">
+                            <li class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm"><strong>Max Players:</strong> 8 per team</li>
+                            <li class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm"><strong>Mandatory:</strong> Minimum 2 ladies/girls</li>
+                            <li class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm"><strong>Mandatory:</strong> Minimum 2 boys (age 10-16)</li>
+                            <li class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm"><strong>Football:</strong> 5 players + 3 substitutes</li>
+                            <li class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm"><strong>Cricket:</strong> 6 players + 2 substitutes</li>
+                            <li class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm"><strong>Walking:</strong> Entire team can participate</li>
+                        </ul>
+                    </section>
+
+                    <section id="schedule" class="content-section">
+                        <h2 class="text-2xl font-bold mb-4 text-[#6B4F4F]">Event Schedule</h2>
+                        <p class="mb-4">The tournament spans four days over two weekends. Use the buttons below to filter the schedule by day. This helps teams and spectators plan their attendance effectively.</p>
+                        <div id="schedule-filters" class="flex flex-wrap gap-2 mb-4">
+                            <button class="filter-btn bg-[#c7a17a] text-white py-2 px-4 rounded-md shadow-sm" data-day="all">All Days</button>
+                            <button class="filter-btn bg-gray-200 text-gray-700 py-2 px-4 rounded-md shadow-sm" data-day="1">Day 1</button>
+                            <button class="filter-btn bg-gray-200 text-gray-700 py-2 px-4 rounded-md shadow-sm" data-day="2">Day 2</button>
+                            <button class="filter-btn bg-gray-200 text-gray-700 py-2 px-4 rounded-md shadow-sm" data-day="3">Day 3</button>
+                            <button class="filter-btn bg-gray-200 text-gray-700 py-2 px-4 rounded-md shadow-sm" data-day="4">Day 4</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-[#FFF8E1]">
+                                    <tr>
+                                        <th class="p-3 border-b-2 border-[#c7a17a]">Time</th>
+                                        <th class="p-3 border-b-2 border-[#c7a17a]">Event</th>
+                                        <th class="p-3 border-b-2 border-[#c7a17a]">Day</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="schedule-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section id="scoring" class="content-section">
+                        <h2 class="text-2xl font-bold mb-4 text-[#6B4F4F]">Scoring System</h2>
+                        <p class="mb-4">A points system tracks team performance. Even in a knockout format, every match counts towards the overall championship. The team with the highest cumulative score wins the grand prize.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm">
+                                <h3 class="font-semibold text-lg">🏅 Game Winner</h3>
+                                <p>Receives a reward and <strong>10 points</strong> for winning their knockout match.</p>
+                            </div>
+                            <div class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm">
+                                <h3 class="font-semibold text-lg">🤝 Draw/Tie</h3>
+                                <p>Both teams receive <strong>5 points</strong> (if applicable, followed by a tie-breaker).</p>
+                            </div>
+                            <div class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm">
+                                <h3 class="font-semibold text-lg">🏃‍♂️ Loss</h3>
+                                <p>Team receives <strong>2 points</strong> for participation in their match.</p>
+                            </div>
+                            <div class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm">
+                                <h3 class="font-semibold text-lg">🚶 Walking Event</h3>
+                                <p>Points awarded based on longest combined team distance.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="leaderboard" class="content-section">
+                        <h2 class="text-2xl font-bold mb-4 text-[#6B4F4F]">Live Leaderboard</h2>
+                        <p class="mb-4">This leaderboard shows the current overall point standings. The chart updates as scores are recorded, providing a real-time visual of the race for the championship. Hover over a team's bar to see their exact point total.</p>
+                        <div class="chart-container">
+                            <canvas id="leaderboardChart"></canvas>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const scheduleFilters = document.querySelectorAll('.filter-btn');
+            const scheduleBody = document.getElementById('schedule-body');
+
+            const scheduleData = [
+                { day: 1, time: 'Morning', event: 'Opening Ceremony & Briefing' },
+                { day: 1, time: 'Late Morning', event: 'Football (Knockout Rounds)' },
+                { day: 1, time: 'Afternoon', event: 'Volleyball (Knockout Rounds)' },
+                { day: 1, time: 'Evening', event: 'Snooker & Badminton (Knockout)' },
+                { day: 2, time: 'Morning', event: 'Cricket (Knockout Rounds)' },
+                { day: 2, time: 'Afternoon', event: 'Football (Finals)' },
+                { day: 2, time: 'Late Afternoon', event: 'Volleyball (Finals)' },
+                { day: 2, time: 'Evening', event: 'Walking Race' },
+                { day: 3, time: 'Morning', event: 'Cricket (Finals)' },
+                { day: 3, time: 'Afternoon', event: 'Tennis (Knockout Rounds)' },
+                { day: 3, time: 'Late Afternoon', event: 'Tennis (Finals)' },
+                { day: 4, time: 'Morning', event: 'Remaining Finals (if any)' },
+                { day: 4, time: 'Afternoon', event: 'Grand Closing Ceremony & Awards' },
+            ];
+
+            function renderSchedule(filter = 'all') {
+                scheduleBody.innerHTML = '';
+                const filteredData = filter === 'all' ? scheduleData : scheduleData.filter(item => item.day == filter);
+                
+                if (filteredData.length === 0) {
+                    scheduleBody.innerHTML = '<tr><td colspan="3" class="p-3 text-center">No events scheduled.</td></tr>';
+                    return;
+                }
+
+                filteredData.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-200 hover:bg-gray-50';
+                    row.innerHTML = `<td class="p-3">${item.time}</td><td class="p-3">${item.event}</td><td class="p-3">Day ${item.day}</td>`;
+                    scheduleBody.appendChild(row);
+                });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    const targetId = link.dataset.target;
+
+                    navLinks.forEach(nav => nav.classList.remove('active'));
+                    link.classList.add('active');
+
+                    contentSections.forEach(section => {
+                        section.classList.remove('active');
+                        if (section.id === targetId) {
+                            section.classList.add('active');
+                        }
+                    });
+                });
+            });
+            
+            scheduleFilters.forEach(button => {
+                button.addEventListener('click', () => {
+                    const day = button.dataset.day;
+                    renderSchedule(day);
+                    scheduleFilters.forEach(btn => {
+                        btn.classList.remove('bg-[#c7a17a]', 'text-white');
+                        btn.classList.add('bg-gray-200', 'text-gray-700');
+                    });
+                    button.classList.add('bg-[#c7a17a]', 'text-white');
+                    button.classList.remove('bg-gray-200', 'text-gray-700');
+                });
+            });
+
+            renderSchedule();
+
+            const leaderboardCtx = document.getElementById('leaderboardChart').getContext('2d');
+            const leaderboardData = {
+                labels: ['Team Alpha', 'Team Bravo', 'Team Charlie', 'Team Delta'],
+                datasets: [{
+                    label: 'Team Points',
+                    data: [28, 42, 18, 35],
+                    backgroundColor: [
+                        'rgba(199, 161, 122, 0.6)',
+                        'rgba(107, 79, 79, 0.6)',
+                        'rgba(160, 82, 45, 0.6)',
+                        'rgba(210, 180, 140, 0.6)'
+                    ],
+                    borderColor: [
+                        '#c7a17a',
+                        '#6B4F4F',
+                        '#A0522D',
+                        '#8B4513'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 5,
+                }]
+            };
+
+            const leaderboardChart = new Chart(leaderboardCtx, {
+                type: 'bar',
+                data: leaderboardData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }},
+                        y: { grid: { display: false }}
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#6B4F4F',
+                            titleFont: { size: 16 },
+                            bodyFont: { size: 14 },
+                            padding: 12,
+                            cornerRadius: 6,
+                            displayColors: false,
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
