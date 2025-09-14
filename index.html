@@ -59,43 +59,63 @@
         }
         .bracket {
             display: flex;
-            justify-content: space-around;
             flex-direction: column;
             width: 100%;
+            align-items: center;
         }
         .round {
             display: flex;
-            flex-direction: column;
             justify-content: center;
+            align-items: center;
             width: 100%;
             flex-grow: 1;
+            padding: 20px 0;
+            position: relative;
         }
         .match {
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
             position: relative;
-            margin: 20px 0;
         }
         .team {
             padding: 10px;
             border: 1px solid #ddd;
             background: #fff;
             border-radius: 4px;
-            margin: 5px 0;
+            margin: 5px;
+            text-align: center;
+            min-width: 100px;
         }
         .connector {
             position: absolute;
-            top: 25%;
-            height: 50%;
-            border: 2px solid #c7a17a;
-            border-left: none;
-        }
-        .line {
-            position: absolute;
-            top: 50%;
-            width: 20px;
+            width: 15px;
             border-top: 2px solid #c7a17a;
+            top: 50%;
+        }
+        .bracket-vertical-line {
+            position: absolute;
+            height: 100%;
+            width: 2px;
+            background: #c7a17a;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .bracket-horizontal-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #c7a17a;
+            top: 50%;
+        }
+        .bracket-connector-line {
+            position: absolute;
+            width: 20px;
+            height: 2px;
+            background: #c7a17a;
+            top: 50%;
+            right: -20px;
         }
     </style>
 </head>
@@ -116,7 +136,7 @@
                         <button data-target="teams" class="nav-link text-left p-3 rounded-md w-full mb-0 md:mb-2 text-sm md:text-base">👥 Teams</button>
                         <button data-target="schedule" class="nav-link text-left p-3 rounded-md w-full mb-0 md:mb-2 text-sm md:text-base">🗓️ Schedule</button>
                         <button data-target="scoring" class="nav-link text-left p-3 rounded-md w-full mb-0 md:mb-2 text-sm md:text-base">🏆 Scoring</button>
-                        <button data-target="leaderboard" class="nav-link text-left p-3 rounded-md w-full mb-0 md:mb-2 text-sm md:text-base">📊 Leaderboard</button>
+                        <button data-target="leaderboard" class="nav-link text-left p-3 rounded-md w-full text-sm md:text-base">📊 Leaderboard</button>
                         <button data-target="news" class="nav-link text-left p-3 rounded-md w-full text-sm md:text-base">📢 Latest News</button>
                     </nav>
                 </aside>
@@ -124,44 +144,54 @@
                 <div class="w-full md:w-3/4 min-h-[400px]">
                     <section id="overview" class="content-section active">
                         <h2 class="text-2xl font-bold mb-4 text-[#6B4F4F]">Tournament Overview</h2>
-                        <p class="mb-4">Welcome to the official hub for our multi-sport tournament in PPR. This event features Tennis, Cricket, Football, Badminton, and TT. Each sport is structured as a high-stakes, single-elimination knockout tournament.</p>
+                        <p class="mb-4">Welcome to the official guide for our multi-sport tournament in PPR. This event features Tennis, Cricket, Football, Badminton, and TT. Each sport is structured as a high-stakes, single-elimination knockout tournament.</p>
                         <p>While individual sports are knockout-based, the overall tournament champion is determined by a cumulative points system. Teams earn points for wins in the various events.</p>
-                        <p class="mb-4">There is a special individual walking event for age group > 50. It will not be part of the team scoring, but a separate prize will be awarded to the individual who covers the longest distance.</p>
+                        <p class="mb-4">There is a special individual walking event for age group > 50. It will not be part of the team scoring, but a separate prize will be awarded to the individual who covers the longest distance during the duration of the tournament.</p>
                         <p>Use the navigation to explore the tournament format, team rules, the full schedule, scoring system, and to track live standings on the leaderboard.</p>
                     </section>
 
                     <section id="format" class="content-section">
                         <h2 class="text-2xl font-bold mb-4 text-[#6B4F4F]">Knockout Format Explained</h2>
-                        <p class="mb-4">Overall event is team based. All blocks need to come up with a Team, Team name and a Captain. Team members need to be from the block. Each team needs to have at least: 10 members, 2 ladies, and 2 kids < 16. All teams need to play all events.</p>
-                        <p class="mb-4">Each sport follows a single-elimination knockout format. This means a team is eliminated from that specific sport's bracket after a single loss. The winner of each match advances to the next round until one champion remains. Below is a simple example for a 4-team bracket.</p>
-                        <div class="flex items-center space-x-4 md:space-x-8 p-4 bg-[#FFF8E1] rounded-lg">
-                            <div class="w-1/3 text-center">
-                                <h3 class="font-semibold mb-2">Semi-Finals</h3>
-                                <div class="relative mb-8">
-                                    <div class="team">Block A</div>
-                                    <div class="team">Block B</div>
-                                </div>
-                                <div class="relative">
-                                    <div class="team">Block C</div>
-                                    <div class="team">Block D</div>
-                                </div>
-                            </div>
-                            <div class="w-1/3 text-center">
-                                <h3 class="font-semibold mb-2">Final</h3>
-                                <div class="relative h-full flex items-center">
-                                    <div class="team w-full">Winner 1</div>
-                                    <div class="team w-full mt-24">Winner 2</div>
+                        <p class="mb-4">Overall event is team based. All blocks (Block A, B, C, D and E) need to come up with a "Team", "Team Name" and a "Captain". All team members need to be from the same block. Each team needs to have at least: 10 members, 2 ladies, and 2 kids < 16. All teams need to play all events. Hence, teams should be formed in a way so that all sport events could be covered</p>
+                        <p class="mb-4">Since we have 5 teams, a perfect knockout bracket isn't possible. Therefore, we will have a random draw to select one team that will get a bye to the semi-final. The remaining four teams will play in the first round. The winners of the two first-round matches will play each other in one semi-final, and the team with the bye will play in the other semi-final. The winners of the semi-finals will meet in the final.</p>
+                        <h3 class="font-semibold text-xl mb-4 text-[#A0522D]">Example Bracket for 5 Teams</h3>
+                        <div class="flex flex-col md:flex-row items-center justify-center space-x-0 md:space-x-8 p-4 bg-[#FFF8E1] rounded-lg">
+                            <div class="flex flex-col items-center w-1/2 md:w-1/4">
+                                <h3 class="font-semibold mb-4 text-sm md:text-base">Round 1</h3>
+                                <div class="flex flex-col w-full relative">
+                                    <div class="match flex-col relative w-full mb-4">
+                                        <div class="team w-full">Team 1</div>
+                                        <div class="team w-full">Team 2</div>
+                                    </div>
+                                    <div class="match flex-col relative w-full">
+                                        <div class="team w-full">Team 3</div>
+                                        <div class="team w-full">Team 4</div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="w-1/3 text-center">
-                                <h3 class="font-semibold mb-2">Champion</h3>
-                                <div class="relative h-full flex items-center">
-                                    <div class="team w-full font-bold bg-[#c7a17a] text-white">🏆 Winner</div>
+                            <div class="flex flex-col items-center w-full md:w-1/4">
+                                <h3 class="font-semibold mb-4 text-sm md:text-base">Semi-Final</h3>
+                                <div class="flex flex-col w-full relative">
+                                    <div class="match flex-col relative w-full mb-4">
+                                        <div class="team w-full">Winner (T1 vs T2)</div>
+                                        <div class="team w-full">Team 5 (Bye)</div>
+                                    </div>
+                                    <div class="match flex-col relative w-full">
+                                        <div class="team w-full">Winner (T3 vs T4)</div>
+                                        <div class="team w-full font-bold bg-[#c7a17a] text-white">🏆 Winner from 1st Semi-Final</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center w-full md:w-1/4">
+                                <h3 class="font-semibold mb-4 text-sm md:text-base">Final</h3>
+                                <div class="flex flex-col w-full relative">
+                                    <div class="match flex-col relative w-full mb-4">
+                                        <div class="team w-full font-bold bg-[#c7a17a] text-white">🏆 Winner</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </section>
-
                     <section id="teams" class="content-section">
                         <h2 class="text-2xl font-bold mb-4 text-[#6B4F4F]">Team List</h2>
                         <p class="mb-6">This section provides a list of all participating teams, along with their assigned captain. The team member lists will be updated as rosters are finalized.</p>
@@ -265,15 +295,15 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm">
                                 <h3 class="font-semibold text-lg">🏅 Game Winner</h3>
-                                <p>Receives a reward and <strong>10 points</strong> for winning their knockout match.</p>
+                                <p>Receives <strong>2 points</strong> for winning their knockout match.</p>
                             </div>
                             <div class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm">
                                 <h3 class="font-semibold text-lg">🤝 Draw/Tie</h3>
-                                <p>Both teams receive <strong>5 points</strong> (if applicable, followed by a tie-breaker).</p>
+                                <p>Both teams receive <strong>1 points</strong> (if applicable, followed by a tie-breaker).</p>
                             </div>
                             <div class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm">
                                 <h3 class="font-semibold text-lg">🏃‍♂️ Loss</h3>
-                                <p>Team receives <strong>2 points</strong> for participation in their match.</p>
+                                <p>Team receives <strong>0 points</strong> for participation in their match.</p>
                             </div>
                             <div class="p-4 bg-[#FFF8E1] rounded-lg shadow-sm">
                                 <h3 class="font-semibold text-lg">🚶 Walking Event</h3>
